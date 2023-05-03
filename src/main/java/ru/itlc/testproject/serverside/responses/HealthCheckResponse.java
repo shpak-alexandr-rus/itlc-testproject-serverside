@@ -8,6 +8,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HealthCheckResponse {
-    private final boolean apiStatus;
     private final boolean dbStatus;
 }
