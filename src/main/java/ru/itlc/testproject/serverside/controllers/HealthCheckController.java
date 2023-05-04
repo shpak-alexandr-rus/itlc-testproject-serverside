@@ -15,8 +15,12 @@ import java.util.Map;
 @RequestMapping("/api")
 public class HealthCheckController {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    public HealthCheckController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @GetMapping("/health-check")
     public ResponseEntity<HealthCheckResponse> getHealthCheck() {
