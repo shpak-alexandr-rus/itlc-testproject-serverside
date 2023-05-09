@@ -11,7 +11,6 @@ import ru.itlc.testproject.serverside.responses.BooleanResponse;
 
 @Controller
 @RequestMapping("/api/books")
-//@SessionAttributes("book")
 public class BookController {
 
     private final BookRepository bookRepo;
@@ -33,9 +32,10 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Book>> getAllBooks() {
+    public ResponseEntity<Iterable<Book>> getAllBooks(@RequestParam int page, @RequestParam int pageSize,
+                                                      @RequestParam String sortingColumn, @RequestParam String sortingDirection) {
         try {
-            return new ResponseEntity<>(bookRepo.findAll(), HttpStatus.OK);
+            return new ResponseEntity<>(bookRepo.findAll(page, pageSize, sortingColumn, sortingDirection), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

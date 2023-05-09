@@ -9,7 +9,7 @@ public interface BookRepository {
 
   Optional<Book> save(Book book);
 
-  Iterable<Book> findAll();
+  Iterable<Book> findAll(int page, int pageSize, String sortingColumn, String sortingDirection);
   
   Optional<Book> findById(long id);
 

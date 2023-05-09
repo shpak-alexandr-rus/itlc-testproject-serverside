@@ -21,6 +21,8 @@ import java.util.Optional;
 public class JdbcBookRepository implements BookRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final String orderByFormat = " ORDER BY %s %s";
+    private final String limitOffsetFormat = " LIMIT %d OFFSET %d";
     @Autowired
     public JdbcBookRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -29,9 +31,9 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public Optional<Book> save(Book book) {
         PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(
-            "insert into Book " +
+            "INSERT INTO Book " +
                     "(book_author, book_title, book_publisher," +
-                    " book_publisher_address, book_publishing_date) values (?, ?, ?, ?, ?)",
+                    " book_publisher_address, book_publishing_date) VALUES (?, ?, ?, ?, ?)",
             Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.DATE);
         pscf.setReturnGeneratedKeys(true);
 
@@ -53,16 +55,23 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     @Override
-    public Iterable<Book> findAll() {
-      return jdbcTemplate.query(
-              "select * from Book",
-              this::mapRowToBook);
+    public Iterable<Book> findAll(int page, int pageSize, String sortingColumn, String sortingDirection) {
+        String query = "SELECT * FROM Book";
+        if (sortingColumn != null) {
+            query += String.format(orderByFormat, sortingColumn, sortingDirection);
+        }
+        query += String.format(limitOffsetFormat, pageSize,
+                pageSize * (page - 1));
+
+        return jdbcTemplate.query(
+                query,
+                this::mapRowToBook);
     }
 
     @Override
     public Optional<Book> findById(long id) {
         List<Book> results = jdbcTemplate.query(
-            "select * from Book where book_id=?",
+            "SELECT * FROM Book WHERE book_id = ?",
             this::mapRowToBook,
             id);
         return results.size() == 0
