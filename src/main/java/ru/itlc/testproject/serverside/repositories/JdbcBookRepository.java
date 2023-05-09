@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.itlc.testproject.serverside.dataobjects.Book;
 import ru.itlc.testproject.serverside.repositories.interfaces.BookRepository;
+import ru.itlc.testproject.serverside.responses.BookPaginationResponse;
 import ru.itlc.testproject.serverside.responses.BooleanResponse;
 
 import java.sql.ResultSet;
@@ -55,7 +56,7 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     @Override
-    public Iterable<Book> findAll(int page, int pageSize, String sortingColumn, String sortingDirection) {
+    public BookPaginationResponse findAll(int page, int pageSize, String sortingColumn, String sortingDirection) {
         String query = "SELECT * FROM Book";
         if (sortingColumn != null) {
             query += String.format(orderByFormat, sortingColumn, sortingDirection);
@@ -63,9 +64,16 @@ public class JdbcBookRepository implements BookRepository {
         query += String.format(limitOffsetFormat, pageSize,
                 pageSize * (page - 1));
 
-        return jdbcTemplate.query(
+        Integer totalBooksCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) AS Count FROM Book",
+                Integer.class);
+        List<Book> books = jdbcTemplate.query(
                 query,
                 this::mapRowToBook);
+
+        BookPaginationResponse result = new BookPaginationResponse(books,
+                pageSize, page, (int)Math.ceil((double)(totalBooksCount)/pageSize), totalBooksCount);
+        return result;
     }
 
     @Override
