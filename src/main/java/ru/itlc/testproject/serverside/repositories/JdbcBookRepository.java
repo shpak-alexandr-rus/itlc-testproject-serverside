@@ -58,7 +58,7 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public BookPaginationResponse findAll(int page, int pageSize, String sortingColumn, String sortingDirection) {
         String query = "SELECT * FROM Book";
-        if (sortingColumn != null) {
+        if (sortingColumn != null && !sortingColumn.isEmpty()) {
             query += String.format(orderByFormat, sortingColumn, sortingDirection);
         }
         query += String.format(limitOffsetFormat, pageSize,
